@@ -26,6 +26,7 @@ if not vc.isOpened():
 pref_width = 960
 pref_height = 720
 pref_fps_in = 30
+
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, pref_width)
 vc.set(cv2.CAP_PROP_FRAME_HEIGHT, pref_height)
 vc.set(cv2.CAP_PROP_FPS, pref_fps_in)
