@@ -1,0 +1,1 @@
+Just run the file in python, and try to switch cameras in zoom. You might have to wait a couple mins for the virtual cam to start.
