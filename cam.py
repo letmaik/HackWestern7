@@ -1,7 +1,7 @@
 import time
 import cv2.cv2 as cv2
 import numpy as np
-import pyvirtualcam
+# import pyvirtualcam
 
 import threading
 
@@ -38,47 +38,88 @@ print(f'webcam capture started ({width}x{height} @ {fps_in}fps)')
 
 fps_out = 20
 
+# try:
+#     delay = 0 # low-latency, reduces internal queue size
+
+#     with pyvirtualcam.Camera(width, height, fps_out, delay, print_fps=True) as cam:
+#         print(f'virtual cam started ({width}x{height} @ {fps_out}fps)')
+
+#         threading.Timer(10.0, printit).start()
+#         while(True):
+#             while timerVar==True:
+#                 # Read frame from webcam
+#                 rval, in_frame = vc.read()
+#                 if not rval:
+#                     raise RuntimeError('error fetching frame')
+
+#                 # 1) Edges
+#                 gray = cv2.cvtColor(in_frame, cv2.COLOR_BGR2GRAY)
+#                 gray = cv2.medianBlur(gray, 5)
+#                 edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
+                
+#                 # 2) Color
+#                 color = cv2.bilateralFilter(in_frame, 9, 300, 300)
+
+#                 # convert to RGBA
+#                 out_frame = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
+#                 out_frame_rgba = np.zeros((height, width, 4), np.uint8)
+#                 out_frame_rgba[:,:,:3] = out_frame
+#                 out_frame_rgba[:,:,3] = 255
+
+#                 # Send to virtual cam
+#                 cam.send(out_frame_rgba)
+
+#                 # Wait until it's time for the next frame
+#                 cam.sleep_until_next_frame()
+
+#             while timerVar==False:
+#                 frame = np.zeros((cam.height, cam.width, 4), np.uint8) # RGBA
+#                 frame[:,:,:3] = cam.frames_sent % 255 # grayscale animation
+#                 frame[:,:,3] = 255
+#                 cam.send(frame)
+#                 cam.sleep_until_next_frame()
+
+# finally:
+#     vc.release()
 try:
     delay = 0 # low-latency, reduces internal queue size
+    print(f'virtual cam started ({width}x{height} @ {fps_out}fps)')
 
-    with pyvirtualcam.Camera(width, height, fps_out, delay, print_fps=True) as cam:
-        print(f'virtual cam started ({width}x{height} @ {fps_out}fps)')
-
-        threading.Timer(10.0, printit).start()
-        while(True):
-            while timerVar==True:
+    threading.Timer(10.0, printit).start()
+    while(True):
+        while timerVar==True:
                 # Read frame from webcam
-                rval, in_frame = vc.read()
-                if not rval:
-                    raise RuntimeError('error fetching frame')
+            rval, in_frame = vc.read()
+            if not rval:
+                raise RuntimeError('error fetching frame')
 
                 # 1) Edges
-                gray = cv2.cvtColor(in_frame, cv2.COLOR_BGR2GRAY)
-                gray = cv2.medianBlur(gray, 5)
-                edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
+            gray = cv2.cvtColor(in_frame, cv2.COLOR_BGR2GRAY)
+            gray = cv2.medianBlur(gray, 5)
+            edges = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 9)
                 
                 # 2) Color
-                color = cv2.bilateralFilter(in_frame, 9, 300, 300)
+            color = cv2.bilateralFilter(in_frame, 9, 300, 300)
 
                 # convert to RGBA
-                out_frame = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
-                out_frame_rgba = np.zeros((height, width, 4), np.uint8)
-                out_frame_rgba[:,:,:3] = out_frame
-                out_frame_rgba[:,:,3] = 255
+            out_frame = cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
+            out_frame_rgba = np.zeros((height, width, 4), np.uint8)
+            out_frame_rgba[:,:,:3] = out_frame
+            out_frame_rgba[:,:,3] = 255
 
                 # Send to virtual cam
-                cam.send(out_frame_rgba)
+            cv2.imshow("Frame", out_frame_rgba)
 
                 # Wait until it's time for the next frame
-                cam.sleep_until_next_frame()
+                # cam.sleep_until_next_frame()
 
-            while timerVar==False:
-                frame = np.zeros((cam.height, cam.width, 4), np.uint8) # RGBA
-                frame[:,:,:3] = cam.frames_sent % 255 # grayscale animation
-                frame[:,:,3] = 255
-                cam.send(frame)
-                cam.sleep_until_next_frame()
+        while timerVar==False:
+            frame = np.zeros((cam.height, cam.width, 4), np.uint8) # RGBA
+            frame[:,:,:3] = cam.frames_sent % 255 # grayscale animation
+            frame[:,:,3] = 255
+            cv2.imshow("Frame", out_frame_rgba)
+                # cam.send(frame)
+                # cam.sleep_until_next_frame()
 
 finally:
     vc.release()
-    
