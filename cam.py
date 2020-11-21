@@ -11,9 +11,9 @@ vc = cv2.VideoCapture(0) # 0 = default camera
 if not vc.isOpened():
     raise RuntimeError('could not open video source')
 
-pref_width = 640
-pref_height = 420
-pref_fps_in = 20
+pref_width = 1280
+pref_height = 720
+pref_fps_in = 60
 vc.set(cv2.CAP_PROP_FRAME_WIDTH, pref_width)
 vc.set(cv2.CAP_PROP_FRAME_HEIGHT, pref_height)
 vc.set(cv2.CAP_PROP_FPS, pref_fps_in)
