@@ -53,6 +53,7 @@ def checkPosture(pos, start):
     h = pos[0][3]
     if abs(x - start[0][0]) > 50 or abs(y - start[0][1]) > 50 or abs(w - start[0][2]) > 50:
         print("FIX YO POSSTUUUUREEEE")
+        # REPLACE with popup
 
 try:
     delay = 0  # low-latency, reduces internal queue size
