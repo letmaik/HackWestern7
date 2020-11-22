@@ -35,13 +35,17 @@ print(f'webcam capture started ({width}x{height} @ {fps_in}fps)')
 
 fps_out = 20
 
-# likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
+likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
 
-# face.joy_likelihood, face.anger_likelihood, face.sorrow_likelihood, face.surprise_likelihood
-def emotionalOutput(anger, sorrow):
-    if (vision.Likelihood(anger) == 'VERY_LIKELY' or 'LIKELY' or 'POSSIBLE' or 'UNLIKELY' ) \
-            or (vision.Likelihood(sorrow) == 'VERY_LIKELY' or 'LIKELY' or 'POSSIBLE' or 'UNLIKELY'):
-        # DO SOMETHING AKA POP UP Reminding them to chill
+def emotionaloutput(face):
+
+    # print('anger: {}'.format(likelihood_name[face.anger_likelihood]))
+    # print(likelihood_name[face.anger_likelihood])
+
+    if likelihood_name[face.anger_likelihood] != 'VERY_UNLIKELY' \
+            or likelihood_name[face.sorrow_likelihood] != 'VERY_UNLIKELY':
+        print("GRRRR ANGRY")
+        # REPLACE with popup
 
 try:
     delay = 0  # low-latency, reduces internal queue size
@@ -101,7 +105,7 @@ try:
 
                 # NOTE: FOR NOW only, we are printing the content. Later this will be passed on to do something
                 for face in response.face_annotations:
-                    emotionalOutput(face.anger_likelihood, face.sorrow_likelihood)
+                    emotionaloutput(face)
                     cam.send(out_frame_rgba)
             else:
                 # Wait until it's time for the next frame - we exclude this from above to avoid delays
