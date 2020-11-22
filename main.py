@@ -35,6 +35,14 @@ print(f'webcam capture started ({width}x{height} @ {fps_in}fps)')
 
 fps_out = 20
 
+# likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
+
+# face.joy_likelihood, face.anger_likelihood, face.sorrow_likelihood, face.surprise_likelihood
+def emotionalOutput(anger, sorrow):
+    if (vision.Likelihood(anger) == 'VERY_LIKELY' or 'LIKELY' or 'POSSIBLE' or 'UNLIKELY' ) \
+            or (vision.Likelihood(sorrow) == 'VERY_LIKELY' or 'LIKELY' or 'POSSIBLE' or 'UNLIKELY'):
+        # DO SOMETHING AKA POP UP Reminding them to chill
+
 try:
     delay = 0  # low-latency, reduces internal queue size
     i = 0 # i = frame counter ONLY used for snapshot
@@ -68,34 +76,36 @@ try:
             cam.send(out_frame_rgba)
 
             # Intermittently select frames to capture and send to GCP
-            # Does so once every 60 frames, in a regular application this could be once every 12 seconds
+            # Does so once every 300 frames, in a regular application this could be once every 12 seconds
 
             if i % 300 == 0:  # if i is divisible by 300 then we are at the 300th frame
                 # Saving frame then using it - SUPER HACKY. NOTE: FIX IF FASTER OPTION
                 file = 'live.png'
                 cv2.imwrite(file, in_frame)
+
+                cam.send(out_frame_rgba)
+
                 with io.open(file, 'rb') as image_file:
                     content = image_file.read()
 
+                # Reducing gray screen length, sending out the same frame before. it may look like it's freezing.
+                cam.send(out_frame_rgba)
+
                 # Setup + Sending GCP request
-                image = vision.Image(content = content) # Sending request
-                response = client.face_detection(image=image) # Saving response, extracting only face detection
+                image = vision.Image(content=content)  # Sending regit quest
+                cam.send(out_frame_rgba)
+                response = client.face_detection(image=image)  # Saving response, extracting only face detection
+
+                # Reducing gray screen length, sending out the same frame before. it may look like it's freezing.
+                cam.send(out_frame_rgba)
 
                 # NOTE: FOR NOW only, we are printing the content. Later this will be passed on to do something
                 for face in response.face_annotations:
-                    joy = vision.Likelihood(face.joy_likelihood)
-                    anger = vision.Likelihood(face.anger_likelihood)
-                    sorrow = vision.Likelihood(face.sorrow_likelihood)
-                    surprise = vision.Likelihood(face.surprise_likelihood)
-                    print('Happy?:', joy.name)
-                    print('Angry?:', anger.name)
-                    print('Sorrow?:', sorrow.name)
-                    print('Surprised?:', surprise.name)
-
-                cv2.imwrite(str(i) + '.jpg', in_frame)
+                    emotionalOutput(face.anger_likelihood, face.sorrow_likelihood)
+                    cam.send(out_frame_rgba)
+            else:
+                # Wait until it's time for the next frame - we exclude this from above to avoid delays
+                cam.sleep_until_next_frame()
             i += 1
-
-            # Wait until it's time for the next frame
-            cam.sleep_until_next_frame()
 finally:
     vc.release()
