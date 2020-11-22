@@ -1,4 +1,5 @@
 opencv-python
 numpy
 pyvirtualcam
+easygui
 google-cloud-vision
