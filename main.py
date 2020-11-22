@@ -35,13 +35,24 @@ print(f'webcam capture started ({width}x{height} @ {fps_in}fps)')
 
 fps_out = 20
 
-# likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
+likelihood_name = ('UNKNOWN', 'VERY_UNLIKELY', 'UNLIKELY', 'POSSIBLE', 'LIKELY', 'VERY_LIKELY')
 
-# face.joy_likelihood, face.anger_likelihood, face.sorrow_likelihood, face.surprise_likelihood
-def emotionalOutput(anger, sorrow):
-    if (vision.Likelihood(anger) == 'VERY_LIKELY' or 'LIKELY' or 'POSSIBLE' or 'UNLIKELY' ) \
-            or (vision.Likelihood(sorrow) == 'VERY_LIKELY' or 'LIKELY' or 'POSSIBLE' or 'UNLIKELY'):
-        # DO SOMETHING AKA POP UP Reminding them to chill
+def emotionaloutput(face):
+
+    # print('anger: {}'.format(likelihood_name[face.anger_likelihood]))
+    # print(likelihood_name[face.anger_likelihood])
+
+    if likelihood_name[face.anger_likelihood] != 'VERY_UNLIKELY' \
+            or likelihood_name[face.sorrow_likelihood] != 'VERY_UNLIKELY':
+        print("GRRRR ANGRY")
+
+def checkPosture(pos, start):
+    x = pos[0][0]
+    y = pos[0][1]
+    w = pos[0][2]
+    h = pos[0][3]
+    if abs(x - start[0][0]) > 50 or abs(y - start[0][1]) > 50 or abs(w - start[0][2]) > 50:
+        print("FIX YO POSSTUUUUREEEE")
 
 try:
     delay = 0  # low-latency, reduces internal queue size
@@ -50,8 +61,22 @@ try:
     with pyvirtualcam.Camera(width, height, fps_out, delay, print_fps=True) as cam:
         print(f'virtual cam started ({width}x{height} @ {fps_out}fps)')
 
-        # Inside infinite loop for webcam
+        # Initiliazing posture
+        rval, in_frame = vc.read()
+        if not rval:
+            raise RuntimeError('error fetching frame')
+        gray = cv2.cvtColor(in_frame, cv2.COLOR_BGR2GRAY)
+        color = cv2.cvtColor(in_frame, cv2.COLOR_BGR2RGB)
+        # data/haarcascade/
+        haar_cascade_face = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+        # array of face positions (2d array). First is number of arrays, then inner is x, y, w, h
+        startingFacePos = haar_cascade_face.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5);
 
+        print(startingFacePos)
+
+        # print('Faces found: ', len(startingFacePos))
+
+        # Inside infinite loop for webcam
         while True:
             # Read frame from webcam
             rval, in_frame = vc.read()
@@ -74,6 +99,12 @@ try:
 
             # Send to virtual cam
             cam.send(out_frame_rgba)
+
+            # Check Posture:
+            pos = haar_cascade_face.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+            # print(pos)
+            if(len(startingFacePos)>0 and len(pos)>0):
+                checkPosture(pos, startingFacePos)
 
             # Intermittently select frames to capture and send to GCP
             # Does so once every 300 frames, in a regular application this could be once every 12 seconds
@@ -101,7 +132,7 @@ try:
 
                 # NOTE: FOR NOW only, we are printing the content. Later this will be passed on to do something
                 for face in response.face_annotations:
-                    emotionalOutput(face.anger_likelihood, face.sorrow_likelihood)
+                    emotionaloutput(face)
                     cam.send(out_frame_rgba)
             else:
                 # Wait until it's time for the next frame - we exclude this from above to avoid delays
