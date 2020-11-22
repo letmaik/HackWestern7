@@ -13,7 +13,7 @@ inbreak = False
 def goInBreak(cam):
     global inbreak
     while (inbreak == True):
-        image = cv2.imread("break.jpg", 1)
+        image = cv2.imread("bearbreak.jpg", 1)
         output = convertImage(image)
         cam.send(output)
         cam.sleep_until_next_frame()
@@ -174,13 +174,13 @@ try:
             if reply=="Share":     # show a Continue/Cancel dialog
                 inbreak=False
                 thread.join()
-                vc = cv2.VideoCapture('longvid.mp4')
+                vc = cv2.VideoCapture('exercises3.mp4')
                 shareVideo(cam)
             elif reply=="Not Now":  # user chose Cancel
                 inbreak=False
                 thread.join()
             elif reply=="Do it Myself":
-                vc = cv2.VideoCapture('longvid.mp4')
+                vc = cv2.VideoCapture('exercises3.mp4')
                 outputUser()
                 inbreak=False
                 thread.join()
